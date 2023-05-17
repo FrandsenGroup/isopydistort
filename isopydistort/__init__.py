@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 ##############################################################################
 #
-# diffpy.mpdf         by Frandsen Group
+# isopydistort        by Frandsen Group
 #                     Benjamin A. Frandsen benfrandsen@byu.edu
-#                     (c) 2022 Benjamin Allen Frandsen
+#                     (c) 2023 Benjamin Allen Frandsen
 #                      All rights reserved
 #
 # File coded by:    Benjamin Frandsen
@@ -16,6 +16,6 @@
 """Tools for interfacing with the ISODISTORT web server.
 """
 
-import pydistort.isoget
+import isopydistort.isoget
 
 # End of file

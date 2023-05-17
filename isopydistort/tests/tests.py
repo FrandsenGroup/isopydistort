@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 ##############################################################################
 #
-# diffpy.mpdf         by Frandsen Group
+# isopydistort        by Frandsen Group
 #                     Benjamin A. Frandsen benfrandsen@byu.edu
-#                     (c) 2022 Benjamin Allen Frandsen
+#                     (c) 2023 Benjamin Allen Frandsen
 #                      All rights reserved
 #
 # File coded by:    Benjamin Frandsen
@@ -13,12 +13,12 @@
 #
 ##############################################################################
 
-"""Unit tests basic pydistort functionalities. Execute via
-python -m pydistort.tests.tests
+"""Unit tests basic isopydistort functionalities. Execute via
+python -m isopydistort.tests.tests
 """
 
 import unittest
-import pydistort
+import isopydistort
 import sys
 import os
 
@@ -32,10 +32,10 @@ class testBasic(unittest.TestCase):
     def test_get(self):
         print('Testing connection to ISODISTORT server...')
         path = os.path.dirname(os.path.abspath(__file__))
-        cif=find('hexMnTe.cif',path)
+        cif = find('hexMnTe.cif',path)
         options = {'basis11':'0', 'basis12':'-1','basis21':'1','basis22':'0'}
         fnameiso = os.path.join(path, "MnTe_iso.txt")
-        pydistort.isoget.get(cif, fnameiso, options)
+        isopydistort.isoget.get(cif, fnameiso, options)
         f = open(fnameiso, 'r')
         lines = f.readlines()
         f.close()

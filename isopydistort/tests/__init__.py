@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 ##############################################################################
 #
-# diffpy.mpdf         by Frandsen Group
+# isopydistort        by Frandsen Group
 #                     Benjamin A. Frandsen benfrandsen@byu.edu
-#                     (c) 2022 Benjamin Allen Frandsen
+#                     (c) 2023 Benjamin Allen Frandsen
 #                      All rights reserved
 #
 # File coded by:    Benjamin Frandsen
@@ -13,7 +13,7 @@
 #
 ##############################################################################
 
-"""Unit tests for pydistort.
+"""Unit tests for isopydistort.
 """
 
 
@@ -26,12 +26,12 @@ del logging
 
 
 def testsuite():
-    '''Build a unit tests suite for the pydistort package.
+    '''Build a unit tests suite for the isopydistort package.
     Return a unittest.TestSuite object.
     '''
     import unittest
     modulenames = '''
-        pydistort.tests.tests
+        isopydistort.tests.tests
     '''.split()
     suite = unittest.TestSuite()
     loader = unittest.defaultTestLoader
@@ -43,7 +43,7 @@ def testsuite():
 
 
 def test():
-    '''Execute all unit tests for the pydistort package.
+    '''Execute all unit tests for the isopydistort package.
     Return a unittest TestResult object.
     '''
     import unittest

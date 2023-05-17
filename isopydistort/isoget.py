@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##############################################################################
 #
-# pydistort         by Frandsen Group
+# isopydistort         by Frandsen Group
 #                     Benjamin A. Frandsen benfrandsen@byu.edu
 #                     (c) 2023 Benjamin Allen Frandsen
 #                      All rights reserved

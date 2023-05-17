@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 ##############################################################################
 #
-# pydistort         by Frandsen Group
+# isopydistort         by Frandsen Group
 #                     Benjamin A. Frandsen benfrandsen@byu.edu
-#                     (c) 2022 Benjamin Allen Frandsen
+#                     (c) 2023 Benjamin Allen Frandsen
 #                      All rights reserved
 #
 # File coded by:    Benjamin Frandsen
@@ -13,10 +13,10 @@
 #
 ##############################################################################
 
-# Installation script for pydistort
+# Installation script for isopydistort
 
-"""pydistort - Tools for interfacing with the ISODISTORT web server.
-Packages:   pydistort
+"""isopydistort - Tools for interfacing with the ISODISTORT web server.
+Packages:   isopydistort
 """
 
 import os
@@ -24,11 +24,11 @@ from setuptools import setup, find_packages
 
 # define distribution
 setup_args = dict(
-        name = "pydistort",
+        name = "isopydistort",
         version = '0.1',
         namespace_packages = [],
         packages = find_packages(),
-        test_suite = 'pydistort.tests',
+        test_suite = 'isopydistort.tests',
         include_package_data = True,
         zip_safe = False,
         author = 'Benjamin A. Frandsen group',
@@ -37,7 +37,7 @@ setup_args = dict(
         maintainer_email = 'benfrandsen@byu.edu',
         description = "Tools for interfacing with ISODISTORT.",
         license = 'BSD-3-clause',
-        url = "https://github.com/FrandsenGroup/pydistort",
+        url = "https://github.com/FrandsenGroup/isopydistort",
         keywords = "",
         classifiers = [
             # List of possible values at
