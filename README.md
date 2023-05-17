@@ -16,7 +16,7 @@ Clone or download this repository on your local machine. Navigate to the downloa
     >>> python setup.py install
 
 ## Documentation
-See https://frandsengroup.github.io/pydistort/.
+See https://frandsengroup.github.io/isopydistort/.
 
 ## Contributors
 
