@@ -1,4 +1,4 @@
-## pydistort
+## isopydistort
 
 Python interface to the ISODISTORT web server.
 
