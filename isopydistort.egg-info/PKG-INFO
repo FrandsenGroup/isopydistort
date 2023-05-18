@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: isopydistort
+Version: 0.1
+Summary: Tools for interfacing with ISODISTORT.
+Home-page: https://github.com/FrandsenGroup/isopydistort
+Author: Benjamin A. Frandsen group
+Author-email: benfrandsen@byu.edu
+Maintainer: Benjamin Frandsen
+Maintainer-email: benfrandsen@byu.edu
+License: BSD-3-clause
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Topic :: Scientific/Engineering :: Physics
+License-File: LICENSE.txt
+License-File: AUTHORS.txt

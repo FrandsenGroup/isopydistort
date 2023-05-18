@@ -1,0 +1,14 @@
+AUTHORS.txt
+LICENSE.txt
+README.md
+setup.py
+isopydistort/__init__.py
+isopydistort/isoget.py
+isopydistort.egg-info/PKG-INFO
+isopydistort.egg-info/SOURCES.txt
+isopydistort.egg-info/dependency_links.txt
+isopydistort.egg-info/namespace_packages.txt
+isopydistort.egg-info/not-zip-safe
+isopydistort.egg-info/top_level.txt
+isopydistort/tests/__init__.py
+isopydistort/tests/tests.py
