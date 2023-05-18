@@ -63,10 +63,10 @@ class testBasic(unittest.TestCase):
     def test_get(self):
         print(&#39;Testing connection to ISODISTORT server...&#39;)
         path = os.path.dirname(os.path.abspath(__file__))
-        cif=find(&#39;hexMnTe.cif&#39;,path)
+        cif = find(&#39;hexMnTe.cif&#39;,path)
         options = {&#39;basis11&#39;:&#39;0&#39;, &#39;basis12&#39;:&#39;-1&#39;,&#39;basis21&#39;:&#39;1&#39;,&#39;basis22&#39;:&#39;0&#39;}
         fnameiso = os.path.join(path, &#34;MnTe_iso.txt&#34;)
-        isopydistort.isoget.get(cif, fnameiso, options)
+        isopydistort.isoget.get(cif, fnameiso, var_dict=options)
         f = open(fnameiso, &#39;r&#39;)
         lines = f.readlines()
         f.close()
@@ -152,10 +152,10 @@ not have a method with the specified name.</p></div>
     def test_get(self):
         print(&#39;Testing connection to ISODISTORT server...&#39;)
         path = os.path.dirname(os.path.abspath(__file__))
-        cif=find(&#39;hexMnTe.cif&#39;,path)
+        cif = find(&#39;hexMnTe.cif&#39;,path)
         options = {&#39;basis11&#39;:&#39;0&#39;, &#39;basis12&#39;:&#39;-1&#39;,&#39;basis21&#39;:&#39;1&#39;,&#39;basis22&#39;:&#39;0&#39;}
         fnameiso = os.path.join(path, &#34;MnTe_iso.txt&#34;)
-        isopydistort.isoget.get(cif, fnameiso, options)
+        isopydistort.isoget.get(cif, fnameiso, var_dict=options)
         f = open(fnameiso, &#39;r&#39;)
         lines = f.readlines()
         f.close()
@@ -183,10 +183,10 @@ not have a method with the specified name.</p></div>
 <pre><code class="python">def test_get(self):
     print(&#39;Testing connection to ISODISTORT server...&#39;)
     path = os.path.dirname(os.path.abspath(__file__))
-    cif=find(&#39;hexMnTe.cif&#39;,path)
+    cif = find(&#39;hexMnTe.cif&#39;,path)
     options = {&#39;basis11&#39;:&#39;0&#39;, &#39;basis12&#39;:&#39;-1&#39;,&#39;basis21&#39;:&#39;1&#39;,&#39;basis22&#39;:&#39;0&#39;}
     fnameiso = os.path.join(path, &#34;MnTe_iso.txt&#34;)
-    isopydistort.isoget.get(cif, fnameiso, options)
+    isopydistort.isoget.get(cif, fnameiso, var_dict=options)
     f = open(fnameiso, &#39;r&#39;)
     lines = f.readlines()
     f.close()
