@@ -193,8 +193,7 @@ def _postDisplayDistort(data,fname):
     f.close()
 
 def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selection=1):
-    &#34;&#34;&#34;Interacts with the Isodistort website to get the available distortion
-    modes. Uses ISODISTORT &#34;Method 3 &#34; and assumes P1 symmetry by default.
+    &#34;&#34;&#34;Interacts with the ISODISTORT website to get distortion modes.
 
     Args:
         cifname (str): The name of the local cif file you want to use.
@@ -207,38 +206,38 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
             keys depend on the method number chosen, as described below.
             
             Method 3: Keys and default values are given below. It defaults to
-            P1 symmetry and an identity matrix for the supercell basis.
-                &#39;subgroupsym&#39; = &#39;1 P1 C1-1&#39;
-                &#39;pointgroupsym&#39; = &#39;0&#39;
-                &#39;latticetype&#39; = &#39;direct&#39;
-                &#39;centering&#39; = &#39;d&#39; (for default)
-                &#39;basis11&#39; = &#39;1&#39;
-                &#39;basis12&#39; = &#39;0&#39;
-                &#39;basis13&#39; = &#39;0&#39;
-                &#39;basis21&#39; = &#39;0&#39;
-                &#39;basis22&#39; = &#39;1&#39;
-                &#39;basis23&#39; = &#39;0&#39;
-                &#39;basis31&#39; = &#39;0&#39;
-                &#39;basis32&#39; = &#39;0&#39;
-                &#39;basis33&#39; = &#39;1&#39;
+            P1 symmetry and an identity matrix for the supercell basis.\n
+                &#39;subgroupsym&#39; = &#39;1 P1 C1-1&#39;\n
+                &#39;pointgroupsym&#39; = &#39;0&#39;\n
+                &#39;latticetype&#39; = &#39;direct&#39;\n
+                &#39;centering&#39; = &#39;d&#39; (for default)\n
+                &#39;basis11&#39; = &#39;1&#39;\n
+                &#39;basis12&#39; = &#39;0&#39;\n
+                &#39;basis13&#39; = &#39;0&#39;\n
+                &#39;basis21&#39; = &#39;0&#39;\n
+                &#39;basis22&#39; = &#39;1&#39;\n
+                &#39;basis23&#39; = &#39;0&#39;\n
+                &#39;basis31&#39; = &#39;0&#39;\n
+                &#39;basis32&#39; = &#39;0&#39;\n
+                &#39;basis33&#39; = &#39;1&#39;\n
             Note that the &#39;subgroupsym&#39; value can simply be the space group
             number (as a string) for the desired subgroup. It is not
             recommended to use the space group symbol alone, since this is
             not always read correctly.
         isoformat (str): format of the output file requested from the
-            ISODISTORT server. Allowed values are:
-                &#39;isovizdistortion&#39;
-                &#39;isovizdiffraction&#39;
-                &#39;structurefile&#39;
-                &#39;distortionfile&#39;
-                &#39;domains&#39;
-                &#39;primary&#39;
-                &#39;modesdetails&#39;
-                &#39;completemodesdetails&#39;
-                &#39;topas&#39;
-                &#39;fullprof&#39;
-                &#39;irreps&#39;
-                &#39;tree&#39;
+            ISODISTORT server. Allowed values are:\n
+                &#39;isovizdistortion&#39;\n
+                &#39;isovizdiffraction&#39;\n
+                &#39;structurefile&#39;\n
+                &#39;distortionfile&#39;\n
+                &#39;domains&#39;\n
+                &#39;primary&#39;\n
+                &#39;modesdetails&#39;\n
+                &#39;completemodesdetails&#39;\n
+                &#39;topas&#39;\n
+                &#39;fullprof&#39;\n
+                &#39;irreps&#39;\n
+                &#39;tree&#39;\n
             See https://stokes.byu.edu/iso/isodistorthelp.php#savedist for
             information about each format. 
         selection (int): The number of the desired distortion from the list
@@ -305,8 +304,7 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
 <span>def <span class="ident">get</span></span>(<span>cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Interacts with the Isodistort website to get the available distortion
-modes. Uses ISODISTORT "Method 3 " and assumes P1 symmetry by default.</p>
+<div class="desc"><p>Interacts with the ISODISTORT website to get distortion modes.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cifname</code></strong> :&ensp;<code>str</code></dt>
@@ -323,42 +321,69 @@ only currently available method number is 3.</dd>
 subgroup symmetry, lattice, and basis. The required dictionary
 keys depend on the method number chosen, as described below.</p>
 <p>Method 3: Keys and default values are given below. It defaults to
-P1 symmetry and an identity matrix for the supercell basis.
-'subgroupsym' = '1 P1 C1-1'
+P1 symmetry and an identity matrix for the supercell basis.</p>
+<pre><code>'subgroupsym' = '1 P1 C1-1'
+
 'pointgroupsym' = '0'
+
 'latticetype' = 'direct'
+
 'centering' = 'd' (for default)
+
 'basis11' = '1'
+
 'basis12' = '0'
+
 'basis13' = '0'
+
 'basis21' = '0'
+
 'basis22' = '1'
+
 'basis23' = '0'
+
 'basis31' = '0'
+
 'basis32' = '0'
+
 'basis33' = '1'
-Note that the 'subgroupsym' value can simply be the space group
+</code></pre>
+<p>Note that the 'subgroupsym' value can simply be the space group
 number (as a string) for the desired subgroup. It is not
 recommended to use the space group symbol alone, since this is
 not always read correctly.</p>
 </dd>
 <dt><strong><code>isoformat</code></strong> :&ensp;<code>str</code></dt>
-<dd>format of the output file requested from the
-ISODISTORT server. Allowed values are:
-'isovizdistortion'
+<dd>
+<p>format of the output file requested from the
+ISODISTORT server. Allowed values are:</p>
+<pre><code>'isovizdistortion'
+
 'isovizdiffraction'
+
 'structurefile'
+
 'distortionfile'
+
 'domains'
+
 'primary'
+
 'modesdetails'
+
 'completemodesdetails'
+
 'topas'
+
 'fullprof'
+
 'irreps'
+
 'tree'
-See <a href="https://stokes.byu.edu/iso/isodistorthelp.php#savedist">https://stokes.byu.edu/iso/isodistorthelp.php#savedist</a> for
-information about each format. </dd>
+</code></pre>
+<p>See <a href="https://stokes.byu.edu/iso/isodistorthelp.php#savedist">https://stokes.byu.edu/iso/isodistorthelp.php#savedist</a> for
+information about each format. </p>
+</dd>
 <dt><strong><code>selection</code></strong> :&ensp;<code>int</code></dt>
 <dd>The number of the desired distortion from the list
 of possible distortions provided by ISODISTORT, starting from 1
@@ -370,8 +395,7 @@ Default value is 1.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selection=1):
-    &#34;&#34;&#34;Interacts with the Isodistort website to get the available distortion
-    modes. Uses ISODISTORT &#34;Method 3 &#34; and assumes P1 symmetry by default.
+    &#34;&#34;&#34;Interacts with the ISODISTORT website to get distortion modes.
 
     Args:
         cifname (str): The name of the local cif file you want to use.
@@ -384,38 +408,38 @@ Default value is 1.</dd>
             keys depend on the method number chosen, as described below.
             
             Method 3: Keys and default values are given below. It defaults to
-            P1 symmetry and an identity matrix for the supercell basis.
-                &#39;subgroupsym&#39; = &#39;1 P1 C1-1&#39;
-                &#39;pointgroupsym&#39; = &#39;0&#39;
-                &#39;latticetype&#39; = &#39;direct&#39;
-                &#39;centering&#39; = &#39;d&#39; (for default)
-                &#39;basis11&#39; = &#39;1&#39;
-                &#39;basis12&#39; = &#39;0&#39;
-                &#39;basis13&#39; = &#39;0&#39;
-                &#39;basis21&#39; = &#39;0&#39;
-                &#39;basis22&#39; = &#39;1&#39;
-                &#39;basis23&#39; = &#39;0&#39;
-                &#39;basis31&#39; = &#39;0&#39;
-                &#39;basis32&#39; = &#39;0&#39;
-                &#39;basis33&#39; = &#39;1&#39;
+            P1 symmetry and an identity matrix for the supercell basis.\n
+                &#39;subgroupsym&#39; = &#39;1 P1 C1-1&#39;\n
+                &#39;pointgroupsym&#39; = &#39;0&#39;\n
+                &#39;latticetype&#39; = &#39;direct&#39;\n
+                &#39;centering&#39; = &#39;d&#39; (for default)\n
+                &#39;basis11&#39; = &#39;1&#39;\n
+                &#39;basis12&#39; = &#39;0&#39;\n
+                &#39;basis13&#39; = &#39;0&#39;\n
+                &#39;basis21&#39; = &#39;0&#39;\n
+                &#39;basis22&#39; = &#39;1&#39;\n
+                &#39;basis23&#39; = &#39;0&#39;\n
+                &#39;basis31&#39; = &#39;0&#39;\n
+                &#39;basis32&#39; = &#39;0&#39;\n
+                &#39;basis33&#39; = &#39;1&#39;\n
             Note that the &#39;subgroupsym&#39; value can simply be the space group
             number (as a string) for the desired subgroup. It is not
             recommended to use the space group symbol alone, since this is
             not always read correctly.
         isoformat (str): format of the output file requested from the
-            ISODISTORT server. Allowed values are:
-                &#39;isovizdistortion&#39;
-                &#39;isovizdiffraction&#39;
-                &#39;structurefile&#39;
-                &#39;distortionfile&#39;
-                &#39;domains&#39;
-                &#39;primary&#39;
-                &#39;modesdetails&#39;
-                &#39;completemodesdetails&#39;
-                &#39;topas&#39;
-                &#39;fullprof&#39;
-                &#39;irreps&#39;
-                &#39;tree&#39;
+            ISODISTORT server. Allowed values are:\n
+                &#39;isovizdistortion&#39;\n
+                &#39;isovizdiffraction&#39;\n
+                &#39;structurefile&#39;\n
+                &#39;distortionfile&#39;\n
+                &#39;domains&#39;\n
+                &#39;primary&#39;\n
+                &#39;modesdetails&#39;\n
+                &#39;completemodesdetails&#39;\n
+                &#39;topas&#39;\n
+                &#39;fullprof&#39;\n
+                &#39;irreps&#39;\n
+                &#39;tree&#39;\n
             See https://stokes.byu.edu/iso/isodistorthelp.php#savedist for
             information about each format. 
         selection (int): The number of the desired distortion from the list
