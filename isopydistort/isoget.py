@@ -39,7 +39,7 @@ def _uploadCIF(cif):
 
     return fname
 
-def _postParentCIF(fname,var_dict):
+def _postParentCIFm3(fname,var_dict):
     """Run "Method 3" on the parent structure.
     """
     up = {'filename':fname, 'input':'uploadparentcif'}
@@ -116,7 +116,7 @@ def _postIsoSubGroup(data, selection):
 
     return data
 
-def _postDistort(data, format):
+def _postDistort(data, isoformat):
     """Prepare the data for downloading.
     """
     out = requests.post(ISO_FORM_SITE,data=data)
@@ -152,7 +152,7 @@ def _postDistort(data, format):
         if b'</FORM>' in line:
             break
 
-    data['origintype'] = format
+    data['origintype'] = isoformat
     return data
 
 def _postDisplayDistort(data,fname):
@@ -163,7 +163,7 @@ def _postDisplayDistort(data,fname):
     f.write(out.text.encode('utf-8'))
     f.close()
 
-def get(cifname,outfname,var_dict={},format='topas',selection=1):
+def get(cifname,outfname,method=3,var_dict={},isoformat='topas',selection=1):
     """Interacts with the Isodistort website to get the available distortion
     modes. Uses ISODISTORT "Method 3 " and assumes P1 symmetry by default.
 
@@ -171,10 +171,14 @@ def get(cifname,outfname,var_dict={},format='topas',selection=1):
         cifname (str): The name of the local cif file you want to use.
         outfname (str): The name of the file where you want the ISODISTORT
             output saved.
-        var_dict (dict): Variables to pass to Method 3 in ISODISTORT to set
-            up the subgroup symmetry, lattice, and basis. Defaults to P1
-            symmetry and an identity matrix for the basis. Keys and default
-            values are:
+        method (int): Method number to be used by the ISODISTORT server. The
+            only currently available method number is 3.
+        var_dict (dict): Variables to pass to ISODISTORT to set up the
+            subgroup symmetry, lattice, and basis. The required dictionary
+            keys depend on the method number chosen, as described below.
+            
+            Method 3: Keys and default values are given below. It defaults to
+            P1 symmetry and an identity matrix for the supercell basis.
                 'subgroupsym' = '1 P1 C1-1'
                 'pointgroupsym' = '0'
                 'latticetype' = 'direct'
@@ -192,8 +196,8 @@ def get(cifname,outfname,var_dict={},format='topas',selection=1):
             number (as a string) for the desired subgroup. It is not
             recommended to use the space group symbol alone, since this is
             not always read correctly.
-        format (str): Format of the output file requested from the ISODISTORT
-            server. Allowed values are:
+        isoformat (str): format of the output file requested from the
+            ISODISTORT server. Allowed values are:
                 'isovizdistortion'
                 'isovizdiffraction'
                 'structurefile'
@@ -213,7 +217,7 @@ def get(cifname,outfname,var_dict={},format='topas',selection=1):
             at the top and increasing as you move downward through the list.
             Default value is 1.
     """
-    ### check that the format is acceptable
+    ### check that the format and method number are acceptable
     formatlist = ['isovizdistortion',
                   'isovizdiffraction',
                   'structurefile',
@@ -226,8 +230,18 @@ def get(cifname,outfname,var_dict={},format='topas',selection=1):
                   'fullprof',
                   'irreps',
                   'tree']
+    methodlist = [3]
     
-    if format not in formatlist:
+    ### if everything is good, move on to the interaction with ISODISTORT
+    if (isoformat in formatlist) and (method in methodlist):  
+        parentcif = _uploadCIF(cifname)
+        # use the correct post function for the user-supplied method number
+        data = eval('_postParentCIFm'+str(method)+'(parentcif, var_dict)')
+        data = _postIsoSubGroup(data, selection)
+        data = _postDistort(data, isoformat)
+        _postDisplayDistort(data,outfname)
+    ### inform the user if there is a problem
+    if isoformat not in formatlist:
         print('This is not a valid format. Acceptable options are:\n')
         print('isovizdistortion')
         print('isovizdiffraction')
@@ -242,9 +256,11 @@ def get(cifname,outfname,var_dict={},format='topas',selection=1):
         print('irreps')
         print('tree\n')
         print('Please try again with one of these formats.')
-    else:    
-        parentcif = _uploadCIF(cifname)
-        data = _postParentCIF(parentcif, var_dict)
-        data = _postIsoSubGroup(data, selection)
-        data = _postDistort(data, format)
-        _postDisplayDistort(data,outfname)
+        return
+    if method not in methodlist:
+        print('This is not a valid method number. Acceptable options are:\n')
+        print(3)
+        print('Please try again with one of these methods.')
+        print('Additional methods may become available in the future.')
+        return
+

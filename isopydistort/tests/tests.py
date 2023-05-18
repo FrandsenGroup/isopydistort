@@ -35,7 +35,7 @@ class testBasic(unittest.TestCase):
         cif = find('hexMnTe.cif',path)
         options = {'basis11':'0', 'basis12':'-1','basis21':'1','basis22':'0'}
         fnameiso = os.path.join(path, "MnTe_iso.txt")
-        isopydistort.isoget.get(cif, fnameiso, options)
+        isopydistort.isoget.get(cif, fnameiso, var_dict=options)
         f = open(fnameiso, 'r')
         lines = f.readlines()
         f.close()
