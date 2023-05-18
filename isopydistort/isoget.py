@@ -164,8 +164,7 @@ def _postDisplayDistort(data,fname):
     f.close()
 
 def get(cifname,outfname,method=3,var_dict={},isoformat='topas',selection=1):
-    """Interacts with the Isodistort website to get the available distortion
-    modes. Uses ISODISTORT "Method 3 " and assumes P1 symmetry by default.
+    """Interacts with the ISODISTORT website to get distortion modes.
 
     Args:
         cifname (str): The name of the local cif file you want to use.
@@ -178,38 +177,38 @@ def get(cifname,outfname,method=3,var_dict={},isoformat='topas',selection=1):
             keys depend on the method number chosen, as described below.
             
             Method 3: Keys and default values are given below. It defaults to
-            P1 symmetry and an identity matrix for the supercell basis.
-                'subgroupsym' = '1 P1 C1-1'
-                'pointgroupsym' = '0'
-                'latticetype' = 'direct'
-                'centering' = 'd' (for default)
-                'basis11' = '1'
-                'basis12' = '0'
-                'basis13' = '0'
-                'basis21' = '0'
-                'basis22' = '1'
-                'basis23' = '0'
-                'basis31' = '0'
-                'basis32' = '0'
-                'basis33' = '1'
+            P1 symmetry and an identity matrix for the supercell basis.\n
+                'subgroupsym' = '1 P1 C1-1'\n
+                'pointgroupsym' = '0'\n
+                'latticetype' = 'direct'\n
+                'centering' = 'd' (for default)\n
+                'basis11' = '1'\n
+                'basis12' = '0'\n
+                'basis13' = '0'\n
+                'basis21' = '0'\n
+                'basis22' = '1'\n
+                'basis23' = '0'\n
+                'basis31' = '0'\n
+                'basis32' = '0'\n
+                'basis33' = '1'\n
             Note that the 'subgroupsym' value can simply be the space group
             number (as a string) for the desired subgroup. It is not
             recommended to use the space group symbol alone, since this is
             not always read correctly.
         isoformat (str): format of the output file requested from the
-            ISODISTORT server. Allowed values are:
-                'isovizdistortion'
-                'isovizdiffraction'
-                'structurefile'
-                'distortionfile'
-                'domains'
-                'primary'
-                'modesdetails'
-                'completemodesdetails'
-                'topas'
-                'fullprof'
-                'irreps'
-                'tree'
+            ISODISTORT server. Allowed values are:\n
+                'isovizdistortion'\n
+                'isovizdiffraction'\n
+                'structurefile'\n
+                'distortionfile'\n
+                'domains'\n
+                'primary'\n
+                'modesdetails'\n
+                'completemodesdetails'\n
+                'topas'\n
+                'fullprof'\n
+                'irreps'\n
+                'tree'\n
             See https://stokes.byu.edu/iso/isodistorthelp.php#savedist for
             information about each format. 
         selection (int): The number of the desired distortion from the list
