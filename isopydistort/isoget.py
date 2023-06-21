@@ -6,7 +6,7 @@
 #                     (c) 2023 Benjamin Allen Frandsen
 #                      All rights reserved
 #
-# File coded by:    Parker Hamilton
+# File coded by:    Parker Hamilton, Tobias Bird, Ben Frandsen
 #
 # See AUTHORS.txt for a list of people who contributed.
 # See LICENSE.txt for license information.
@@ -236,7 +236,7 @@ def get(cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1
         outfname (str): The name of the file where you want the ISODISTORT
             output saved.
         method (int): Method number to be used by the ISODISTORT server. The
-            only currently available method number is 3.
+            currently available method numbers are 3 and 4.
         var_dict (dict): Variables to pass to ISODISTORT to set up the
             subgroup symmetry, lattice, and basis. The required dictionary
             keys depend on the method number chosen, as described below.
@@ -328,7 +328,7 @@ def get(cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1
         return
     if method not in methodlist:
         print('This is not a valid method number. Acceptable options are:\n')
-        print(3)
+        print(methodlist)
         print('Please try again with one of these methods.')
         print('Additional methods may become available in the future.')
         return

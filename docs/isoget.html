@@ -35,46 +35,59 @@
 #                     (c) 2023 Benjamin Allen Frandsen
 #                      All rights reserved
 #
-# File coded by:    Parker Hamilton
+# File coded by:    Parker Hamilton, Tobias Bird, Ben Frandsen
 #
 # See AUTHORS.txt for a list of people who contributed.
 # See LICENSE.txt for license information.
 # We acknowledge Brian Toby and Robert Von Dreele as the first to develop a
 # python interface to ISODISTORT, which served as a valuable starting point
 # for this package. Their work can be found as part of the GSAS-II software at
-# https://subversion.xray.aps.anl.gov/trac/pyGSAS/browser/trunk/ISODISTORT.py 
+# https://subversion.xray.aps.anl.gov/trac/pyGSAS/browser/trunk/ISODISTORT.py
 ##############################################################################
 
 &#34;&#34;&#34;Tools to interface with ISODISTORT&#34;&#34;&#34;
 
 import requests
 
-
 ISO_UPLOAD_SITE = &#34;https://iso.byu.edu/iso/isodistortuploadfile.php&#34;
 ISO_FORM_SITE = &#34;https://iso.byu.edu/iso/isodistortform.php&#34;
+
 
 def _uploadCIF(cif):
     &#34;&#34;&#34;Upload CIF to ISODISTORT.
     &#34;&#34;&#34;
-    f = open(cif,&#39;rb&#39;)
-    up = {&#39;toProcess&#39;:(cif,f),}
-    out = requests.post(ISO_UPLOAD_SITE,files=up).text
+    f = open(cif, &#39;rb&#39;)
+    up = {&#39;toProcess&#39;: (cif, f), }
+    out = requests.post(ISO_UPLOAD_SITE, files=up).text
     f.close()
 
     start = out.index(&#34;VALUE=&#34;)
-    start = out.index(&#39;&#34;&#39;,start+1)+1
-    end = out.index(&#39;&#34;&#39;,start)
+    start = out.index(&#39;&#34;&#39;, start + 1) + 1
+    end = out.index(&#39;&#34;&#39;, start)
     fname = out[start:end]
 
     return fname
 
-def _postParentCIFm3(fname,var_dict):
-    &#34;&#34;&#34;Run &#34;Method 3&#34; on the parent structure.
-    &#34;&#34;&#34;
-    up = {&#39;filename&#39;:fname, &#39;input&#39;:&#39;uploadparentcif&#39;}
-    out = requests.post(ISO_FORM_SITE,up)
-
+def _postParentCIF(fname):
+    #posts initially uploaded CIF, sets all data
+    up = {&#39;filename&#39;: fname, &#39;input&#39;: &#39;uploadparentcif&#39;}
+    out = requests.post(ISO_FORM_SITE, up)
     data = {}
+    line_iter = out.iter_lines()
+
+    for line in line_iter:
+        if b&#39;INPUT TYPE=&#34;hidden&#34;&#39; in line:
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 3)
+            name = items[2].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
+
+            val = items[3].split(&#39;=&#39;, 1)[1].strip(&#39;&gt;&#34;&#39;)
+            data[name] = val
+
+
+    return out, data
+
+def _setDatam3(out, data, var_dict = {}, selection = 1):
+    &#34;&#34;&#34;sets necessary data for method 3 - rolls in postIsosubgroup and part of postParentm3&#34;&#34;&#34;
     line_iter = out.iter_lines()
     for line in line_iter:
         if b&#34;Method 3&#34; in line:
@@ -82,10 +95,10 @@ def _postParentCIFm3(fname,var_dict):
 
     for line in line_iter:
         if b&#39;INPUT TYPE=&#34;hidden&#34;&#39; in line:
-            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;,3)
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 3)
             name = items[2].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
 
-            val = items[3].split(&#39;=&#39;,1)[1].strip(&#39;&gt;&#34;&#39;)
+            val = items[3].split(&#39;=&#39;, 1)[1].strip(&#39;&gt;&#34;&#39;)
             data[name] = val
         if b&#39;Method 4&#39; in line:
             break
@@ -103,15 +116,10 @@ def _postParentCIFm3(fname,var_dict):
     data[&#39;basis31&#39;] = &#39;0&#39;
     data[&#39;basis32&#39;] = &#39;0&#39;
     data[&#39;basis33&#39;] = &#39;1&#39;
-    for key,value in var_dict.items():
+    for key, value in var_dict.items():
         data[key] = value
 
-    return data
-
-def _postIsoSubGroup(data, selection):
-    &#34;&#34;&#34;Select the distortion mode.
-    &#34;&#34;&#34;
-    out = requests.post(ISO_FORM_SITE,data=data)
+    out = requests.post(ISO_FORM_SITE, data=data)
     data = {}
     line_iter = out.iter_lines()
 
@@ -121,23 +129,23 @@ def _postIsoSubGroup(data, selection):
 
     for line in line_iter:
         if b&#39;INPUT TYPE=&#34;hidden&#34;&#39; in line:
-            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;,3)
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 3)
             name = items[2].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
 
-            val = items[3].split(&#39;=&#39;,1)[1].strip(&#39;&gt;&#34;&#39;)
+            val = items[3].split(&#39;=&#39;, 1)[1].strip(&#39;&gt;&#34;&#39;)
             data[name] = val
         if b&#39;&lt;br&gt;&#39; in line:
             break
 
-    counter = 0 # keep track of which distortion we are on
+    counter = 0  # keep track of which distortion we are on
     for line in line_iter:
         if b&#39;RADIO&#39; in line:
             counter += 1
-            if counter == selection: # grab data just for the one we want
-                items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;,3)
+            if counter == selection:  # grab data just for the one we want
+                items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 3)
                 name = items[2].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
 
-                val = items[3].split(&#39;=&#39;,1)[1].strip(&#39;&gt;&#34;&#39;)
+                val = items[3].split(&#39;=&#39;, 1)[1].strip(&#39;&gt;&#34;&#39;)
                 data[name] = val
 
         if b&#39;&lt;/FORM&gt;&#39; in line:
@@ -145,10 +153,65 @@ def _postIsoSubGroup(data, selection):
 
     return data
 
+
+
+
+
+def _setDatam4(data, subcif, specify = False, basis = [], var_dict = {}):
+
+    subfname = _uploadCIF(subcif)
+    data[&#39;input&#39;] = &#39;uploadsubgroupcif&#39;
+    data[&#39;filename&#39;] = subfname
+
+    out = requests.post(ISO_FORM_SITE, data=data)
+    line_iter = out.iter_lines()
+    # for line in line_iter:
+    # print(line.decode(&#39;utf-8&#39;))
+
+    for line in line_iter:
+        if b&#39;INPUT TYPE=&#34;hidden&#34;&#39; in line:
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 3)
+            name = items[2].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
+
+            val = items[3].split(&#39;=&#39;, 1)[1].strip(&#39;&gt;&#34;&#39;)
+            data[name] = val
+        if specify == False and b&#39;OPTION VALUE=&#39; in line:
+            data[&#39;inputbasis&#39;] = &#39;list&#39;
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 1)
+            data[&#39;basisselect&#39;] = items[1].split(&#39;=&#39;)[1].split(&#34;&gt;&#34;)[0].strip(&#39;&#34;&#39;)
+            print(items[1].split(&#39;=&#39;)[1].split(&#34;&gt;&#34;)[0].strip(&#39;&#34;&#39;))
+
+    data[&#39;input&#39;] = &#39;distort&#39;
+    data[&#39;origintype&#39;] = &#39;method4&#39;
+
+    if specify == True:
+        basis_vars = [&#34;basis11&#34;, &#34;basis12&#34;, &#34;basis13&#34;, &#34;basis21&#34;, &#34;basis22&#34;, &#34;basis23&#34;, &#34;basis31&#34;, &#34;basis32&#34;, &#34;basis33&#34;]
+        if not basis:
+            print(&#34;No basis specified. Exiting...&#34;)
+            print(&#34;Try specifying a basis or setting specify to False&#34;)
+        if len(basis) != 9:
+            print(&#34;Incorrect number of elements for basis, expected 9&#34;)
+        else:
+            data[&#39;inputbasis&#39;] = &#39;specify&#39;
+            for i in range(len(basis_vars)):
+                data[basis_vars[i]] = f&#39;{basis[i]}&#39;
+
+    data[&#39;chooseorigin&#39;] = False
+    data[&#39;trynearest&#39;] = True
+    data[&#39;dmax&#39;] = 1
+    data[&#39;zeromodes&#39;] = False
+
+    for key, value in var_dict.items():
+        data[key] = value
+
+    return data
+
+
+
 def _postDistort(data, isoformat):
     &#34;&#34;&#34;Prepare the data for downloading.
     &#34;&#34;&#34;
-    out = requests.post(ISO_FORM_SITE,data=data)
+    out = requests.post(ISO_FORM_SITE, data=data)
 
     data = {}
     line_iter = out.iter_lines()
@@ -158,21 +221,21 @@ def _postDistort(data, isoformat):
 
     for line in line_iter:
         if b&#39;INPUT TYPE=&#34;hidden&#34;&#39; in line:
-            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;,3)
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 3)
             name = items[2].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
 
-            val = items[3].split(&#39;=&#39;,1)[1].strip(&#39;&gt;&#34;&#39;)
+            val = items[3].split(&#39;=&#39;, 1)[1].strip(&#39;&gt;&#34;&#39;)
             data[name] = val
 
         if b&#39;input type=&#34;text&#34;&#39; in line:
-            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;,5)
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 5)
             name = [s for s in items if &#39;name=&#39; in s][0].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
 
             val = [s for s in items if &#39;value=&#39; in s][0].split(&#39;=&#39;)[1].strip(&#39;&#34;&#39;)
             data[name] = val
 
         if b&#39;RADIO&#39; in line and b&#39;CHECKED&#39; in line:
-            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;,3)
+            items = line.decode(&#39;utf-8&#39;).split(&#39; &#39;, 3)
             name = items[2].split(&#39;&#34;&#39;)[1]
 
             val = items[3].split(&#39;&#34;&#39;)[1]
@@ -184,15 +247,17 @@ def _postDistort(data, isoformat):
     data[&#39;origintype&#39;] = isoformat
     return data
 
-def _postDisplayDistort(data,fname):
+
+def _postDisplayDistort(data, fname):
     &#34;&#34;&#34;Download the ISODISTORT output.
     &#34;&#34;&#34;
-    out = requests.post(ISO_FORM_SITE,data=data)
-    f = open(fname,&#39;wb&#39;)
+    out = requests.post(ISO_FORM_SITE, data=data)
+    f = open(fname, &#39;wb&#39;)
     f.write(out.text.encode(&#39;utf-8&#39;))
     f.close()
 
-def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selection=1):
+
+def get(cifname, outfname, method=3, var_dict={}, isoformat=&#39;topas&#39;, selection=1, subcif = &#34;&#34;, specify = False, basis = []):
     &#34;&#34;&#34;Interacts with the ISODISTORT website to get distortion modes.
 
     Args:
@@ -200,11 +265,11 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
         outfname (str): The name of the file where you want the ISODISTORT
             output saved.
         method (int): Method number to be used by the ISODISTORT server. The
-            only currently available method number is 3.
+            currently available method numbers are 3 and 4.
         var_dict (dict): Variables to pass to ISODISTORT to set up the
             subgroup symmetry, lattice, and basis. The required dictionary
             keys depend on the method number chosen, as described below.
-            
+
             Method 3: Keys and default values are given below. It defaults to
             P1 symmetry and an identity matrix for the supercell basis.\n
                 &#39;subgroupsym&#39; = &#39;1 P1 C1-1&#39;\n
@@ -239,7 +304,7 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
                 &#39;irreps&#39;\n
                 &#39;tree&#39;\n
             See https://stokes.byu.edu/iso/isodistorthelp.php#savedist for
-            information about each format. 
+            information about each format.
         selection (int): The number of the desired distortion from the list
             of possible distortions provided by ISODISTORT, starting from 1
             at the top and increasing as you move downward through the list.
@@ -258,16 +323,21 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
                   &#39;fullprof&#39;,
                   &#39;irreps&#39;,
                   &#39;tree&#39;]
-    methodlist = [3]
-    
+    methodlist = [3,4]
+
     ### if everything is good, move on to the interaction with ISODISTORT
-    if (isoformat in formatlist) and (method in methodlist):  
+    if (isoformat in formatlist) and (method in methodlist):
         parentcif = _uploadCIF(cifname)
+        out, data = _postParentCIF(parentcif)
         # use the correct post function for the user-supplied method number
-        data = eval(&#39;_postParentCIFm&#39;+str(method)+&#39;(parentcif, var_dict)&#39;)
-        data = _postIsoSubGroup(data, selection)
+        #data = eval(&#39;_postParentCIFm&#39; + str(method) + &#39;(parentcif, var_dict)&#39;)
+        if method == 3:
+            data = _setDatam3(out, data, var_dict = var_dict, selection = selection)
+        if method == 4:
+            data = _setDatam4(data, subcif, specify = specify, basis = basis, var_dict = var_dict)
+        #data = _postIsoSubGroup(data, selection)
         data = _postDistort(data, isoformat)
-        _postDisplayDistort(data,outfname)
+        _postDisplayDistort(data, outfname)
     ### inform the user if there is a problem
     if isoformat not in formatlist:
         print(&#39;This is not a valid format. Acceptable options are:\n&#39;)
@@ -287,7 +357,7 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
         return
     if method not in methodlist:
         print(&#39;This is not a valid method number. Acceptable options are:\n&#39;)
-        print(3)
+        print(methodlist)
         print(&#39;Please try again with one of these methods.&#39;)
         print(&#39;Additional methods may become available in the future.&#39;)
         return</code></pre>
@@ -301,7 +371,7 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="isopydistort.isoget.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1)</span>
+<span>def <span class="ident">get</span></span>(<span>cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1, subcif='', specify=False, basis=[])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Interacts with the ISODISTORT website to get distortion modes.</p>
@@ -314,7 +384,7 @@ def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selectio
 output saved.</dd>
 <dt><strong><code>method</code></strong> :&ensp;<code>int</code></dt>
 <dd>Method number to be used by the ISODISTORT server. The
-only currently available method number is 3.</dd>
+currently available method numbers are 3 and 4.</dd>
 <dt><strong><code>var_dict</code></strong> :&ensp;<code>dict</code></dt>
 <dd>
 <p>Variables to pass to ISODISTORT to set up the
@@ -382,7 +452,7 @@ ISODISTORT server. Allowed values are:</p>
 'tree'
 </code></pre>
 <p>See <a href="https://stokes.byu.edu/iso/isodistorthelp.php#savedist">https://stokes.byu.edu/iso/isodistorthelp.php#savedist</a> for
-information about each format. </p>
+information about each format.</p>
 </dd>
 <dt><strong><code>selection</code></strong> :&ensp;<code>int</code></dt>
 <dd>The number of the desired distortion from the list
@@ -394,7 +464,7 @@ Default value is 1.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get(cifname,outfname,method=3,var_dict={},isoformat=&#39;topas&#39;,selection=1):
+<pre><code class="python">def get(cifname, outfname, method=3, var_dict={}, isoformat=&#39;topas&#39;, selection=1, subcif = &#34;&#34;, specify = False, basis = []):
     &#34;&#34;&#34;Interacts with the ISODISTORT website to get distortion modes.
 
     Args:
@@ -402,11 +472,11 @@ Default value is 1.</dd>
         outfname (str): The name of the file where you want the ISODISTORT
             output saved.
         method (int): Method number to be used by the ISODISTORT server. The
-            only currently available method number is 3.
+            currently available method numbers are 3 and 4.
         var_dict (dict): Variables to pass to ISODISTORT to set up the
             subgroup symmetry, lattice, and basis. The required dictionary
             keys depend on the method number chosen, as described below.
-            
+
             Method 3: Keys and default values are given below. It defaults to
             P1 symmetry and an identity matrix for the supercell basis.\n
                 &#39;subgroupsym&#39; = &#39;1 P1 C1-1&#39;\n
@@ -441,7 +511,7 @@ Default value is 1.</dd>
                 &#39;irreps&#39;\n
                 &#39;tree&#39;\n
             See https://stokes.byu.edu/iso/isodistorthelp.php#savedist for
-            information about each format. 
+            information about each format.
         selection (int): The number of the desired distortion from the list
             of possible distortions provided by ISODISTORT, starting from 1
             at the top and increasing as you move downward through the list.
@@ -460,16 +530,21 @@ Default value is 1.</dd>
                   &#39;fullprof&#39;,
                   &#39;irreps&#39;,
                   &#39;tree&#39;]
-    methodlist = [3]
-    
+    methodlist = [3,4]
+
     ### if everything is good, move on to the interaction with ISODISTORT
-    if (isoformat in formatlist) and (method in methodlist):  
+    if (isoformat in formatlist) and (method in methodlist):
         parentcif = _uploadCIF(cifname)
+        out, data = _postParentCIF(parentcif)
         # use the correct post function for the user-supplied method number
-        data = eval(&#39;_postParentCIFm&#39;+str(method)+&#39;(parentcif, var_dict)&#39;)
-        data = _postIsoSubGroup(data, selection)
+        #data = eval(&#39;_postParentCIFm&#39; + str(method) + &#39;(parentcif, var_dict)&#39;)
+        if method == 3:
+            data = _setDatam3(out, data, var_dict = var_dict, selection = selection)
+        if method == 4:
+            data = _setDatam4(data, subcif, specify = specify, basis = basis, var_dict = var_dict)
+        #data = _postIsoSubGroup(data, selection)
         data = _postDistort(data, isoformat)
-        _postDisplayDistort(data,outfname)
+        _postDisplayDistort(data, outfname)
     ### inform the user if there is a problem
     if isoformat not in formatlist:
         print(&#39;This is not a valid format. Acceptable options are:\n&#39;)
@@ -489,7 +564,7 @@ Default value is 1.</dd>
         return
     if method not in methodlist:
         print(&#39;This is not a valid method number. Acceptable options are:\n&#39;)
-        print(3)
+        print(methodlist)
         print(&#39;Please try again with one of these methods.&#39;)
         print(&#39;Additional methods may become available in the future.&#39;)
         return</code></pre>
