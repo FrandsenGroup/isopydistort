@@ -19,6 +19,7 @@
 """Tools to interface with ISODISTORT"""
 
 import requests
+import re
 
 ISO_UPLOAD_SITE = "https://iso.byu.edu/iso/isodistortuploadfile.php"
 ISO_FORM_SITE = "https://iso.byu.edu/iso/isodistortform.php"
@@ -54,7 +55,6 @@ def _postParentCIF(fname):
             val = items[3].split('=', 1)[1].strip('>"')
             data[name] = val
 
-
     return out, data
 
 def _setDatam3(out, data, var_dict = {}, selection = 1):
@@ -89,7 +89,10 @@ def _setDatam3(out, data, var_dict = {}, selection = 1):
     data['basis33'] = '1'
     for key, value in var_dict.items():
         data[key] = value
-
+    #For later: allow non-default selections of types of distortions
+    #to be considered. Examples shown below.
+    #del data['includedisplacive001'] #de-selects displacive modes for first atom
+    #data['includemagnetic002'] = 'true' #selects magnetic modes for second atom
     out = requests.post(ISO_FORM_SITE, data=data)
     data = {}
     line_iter = out.iter_lines()
@@ -121,8 +124,8 @@ def _setDatam3(out, data, var_dict = {}, selection = 1):
 
         if b'</FORM>' in line:
             break
-
-    return data
+    
+    return out, data
 
 
 
@@ -175,15 +178,23 @@ def _setDatam4(data, subcif, specify = False, basis = [], var_dict = {}):
     for key, value in var_dict.items():
         data[key] = value
 
-    return data
+    return out, data
 
 
 
-def _postDistort(data, isoformat):
+def _postDistort(data, isoformat, output_dict = {}, generate_zipped_files=False):
     """Prepare the data for downloading.
+    
+    output_dict: options for the isodistort output, such as whether strain should be
+                 included in the topas files, zipped files should be prepared, etc.
+                 Non-exhaustive list of options to set to 'true' if desired:
+                 'topasstrain' (include strain in topas file)
+                 'treecif' (generate CIFs for all subgroups in tree)
+                 'treetopas' (generate topas files for all subgroups in tree)
+                 
     """
     out = requests.post(ISO_FORM_SITE, data=data)
-
+    
     data = {}
     line_iter = out.iter_lines()
     for line in line_iter:
@@ -216,19 +227,43 @@ def _postDistort(data, isoformat):
             break
 
     data['origintype'] = isoformat
-    return data
+    for key, value in output_dict.items():
+        data[key] = value
+    
+    return out, data
 
 
-def _postDisplayDistort(data, fname):
+def _postDisplayDistort(data, fname, zipped=False):
     """Download the ISODISTORT output.
     """
     out = requests.post(ISO_FORM_SITE, data=data)
     f = open(fname, 'wb')
-    f.write(out.text.encode('utf-8'))
+    if zipped:
+       f.write(out.content)
+    else:
+        f.write(out.text.encode('utf-8'))
     f.close()
+    return out
 
+def _find_zip_file_name(output):
+    """Parse http output to get file names of zipped topas and cif files
+    """
+    returndict = {}
+    lines = list(output.iter_lines())
+    while len(returndict) < 2:
+        for line in lines[::-1]:
+            line = str(line)
+            if ('zipfilename' in line) and ('cif' in line):
+                string = line.strip().split('VALUE=')[-1].strip()
+                returndict['cifzipname'] = re.findall(r'[a-zA-Z]+[0-9]+', string)[0]
+            if ('zipfilename' in line) and ('topas' in line):
+                string = line.strip().split('VALUE=')[-1].strip()
+                returndict['topaszipname'] = re.findall(r'[a-zA-Z]+[0-9]+', string)[0]
+    return returndict 
 
-def get(cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1, subcif = "", specify = False, basis = []):
+def get(cifname, outfname, method=3, var_dict={}, isoformat='topas',
+        selection=1, subcif = "", specify = False, basis = [],
+        generate_tree_zip = False, output_dict={}):
     """Interacts with the ISODISTORT website to get distortion modes.
 
     Args:
@@ -280,6 +315,14 @@ def get(cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1
             of possible distortions provided by ISODISTORT, starting from 1
             at the top and increasing as you move downward through the list.
             Default value is 1.
+        generate_tree_zip (boolean): True if zipped directories containing CIFs
+            and topas files for the full subgroup tree are desired. Only
+            applicable if 'tree' is chosen as the isoformat for Method 3.
+            Output will include the tree file and the zipped directories.
+        output_dict (dictionary): Various other options for the isodistort
+            output. Currently, the only supported option is:\n
+                'topasstrain' : 'true'\n
+            which includes strain parameters in the topas files.
     """
     ### check that the format and method number are acceptable
     formatlist = ['isovizdistortion',
@@ -299,22 +342,50 @@ def get(cifname, outfname, method=3, var_dict={}, isoformat='topas', selection=1
     ### if everything is good, move on to the interaction with ISODISTORT
     if (isoformat in formatlist) and (method in methodlist):
         parentcif = _uploadCIF(cifname)
-        out, data = _postParentCIF(parentcif)
+        out1, data1 = _postParentCIF(parentcif)
         # use the correct post function for the user-supplied method number
         #data = eval('_postParentCIFm' + str(method) + '(parentcif, var_dict)')
         if method == 3:
-            data = _setDatam3(out, data, var_dict = var_dict, selection = selection)
+            out2, data2 = _setDatam3(out1, data1, var_dict = var_dict, selection = selection)
+            if not generate_tree_zip:
+                out3, data3 = _postDistort(data2, isoformat, output_dict)
+                out4 = _postDisplayDistort(data3, outfname)
+            if generate_tree_zip:
+                if isoformat == 'tree':
+                    output_dict['treecif'] = 'true'
+                    output_dict['treetopas'] = 'true'
+                    out3, data3 = _postDistort(data2, isoformat, output_dict)
+                    out4 = _postDisplayDistort(data3, outfname) # generate tree file
+                    # now generate zipped directories
+                    # first, find the file names of the zipped directories
+                    filedict = _find_zip_file_name(out4)
+                    # download the zipped topas directory
+                    data3['origintype'] = 'topaszip'
+                    data3['input'] = 'download'
+                    data3['zipfilename'] = filedict['topaszipname']
+                    temp = _postDisplayDistort(data3, outfname+'_topas.zip', zipped=True)
+                    # download the zipped cif directory
+                    data3['origintype'] = 'topaszip'
+                    data3['zipfilename'] = filedict['cifzipname']
+                    temp = _postDisplayDistort(data3, outfname+'_cif.zip', zipped=True)
+                else:
+                    print('To generate zipped directories of topas and cif files from a subgroup tree,')
+                    print("you must set isoformat to 'tree'.")
+                    out3 = []
+                    data3 = []
+                    out4 = []
+
         if method == 4:
-            data = _setDatam4(data, subcif, specify = specify, basis = basis, var_dict = var_dict)
-        #data = _postIsoSubGroup(data, selection)
-        data = _postDistort(data, isoformat)
-        _postDisplayDistort(data, outfname)
+            out2, data2 = _setDatam4(data, subcif, specify = specify, basis = basis, var_dict = var_dict)
+            out3, data3 = _postDistort(data2, isoformat)
+            out4 = _postDisplayDistort(data3, outfname)
+        return [out1, data1, out2, data2, out3, data3, out4]
     ### inform the user if there is a problem
     if isoformat not in formatlist:
         print('This is not a valid format. Acceptable options are:\n')
         print('isovizdistortion')
         print('isovizdiffraction')
-        print('structurefile')
+        print('structurefile (which generates a cif)')
         print('distortionfile')
         print('domains')
         print('primary')
