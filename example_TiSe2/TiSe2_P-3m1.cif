@@ -1,0 +1,53 @@
+# CIF file created by ISOCIF, version 2.7.0               
+# Space Group: 164 P-3m1
+# 
+# Lattice parameters: a=3.536, b=3.536, c=6.004, alpha=90, beta=90, gamma=120
+# Ti1 1a (0,0,0)
+# Se1 2d (1/3,2/3,z), z=0.2552
+
+data_isocif-output
+_audit_creation_method ISOCIF
+
+_cell_length_a    3.52709
+_cell_length_b    3.52709
+_cell_length_c    5.99253
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 120.00000
+_cell_volume      65.01234
+
+_symmetry_space_group_name_H-M "P -3 2/m 1"
+_symmetry_Int_Tables_number 164
+_space_group.reference_setting '164:-P 3 2"'
+_space_group.transform_Pp_abc a,b,c;0,0,0
+
+loop_
+_space_group_symop_id
+_space_group_symop_operation_xyz
+1 x,y,z
+2 -y,x-y,z
+3 -x+y,-x,z
+4 x-y,-y,-z
+5 y,x,-z
+6 -x,-x+y,-z
+7 -x,-y,-z
+8 y,-x+y,-z
+9 x-y,x,-z
+10 -x+y,y,z
+11 -y,-x,z
+12 x,x-y,z
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_fract_symmform
+Ti1 Ti   1 a 0.00000 0.00000 0.00000 1.00000 0,0,0  
+Se1 Se   2 d 0.33333 0.66667 0.256469 1.00000 0,0,Dz 
+
+# end of cif
