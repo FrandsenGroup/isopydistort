@@ -7,6 +7,8 @@
 #                      All rights reserved
 #
 # File coded by:    Parker Hamilton, Tobias Bird, Ben Frandsen
+# Modified by:
+#	2024/08/21: Max Pelly, Change to regex to fix bug in _postDistort preventing readign of +ve numbers
 #
 # See AUTHORS.txt for a list of people who contributed.
 # See LICENSE.txt for license information.
@@ -153,7 +155,7 @@ def _setDatam4(data, subcif, specify = False, basis = [], var_dict = {}):
             data['inputbasis'] = 'list'
             items = line.decode('utf-8').split(' ', 1)
             data['basisselect'] = items[1].split('=')[1].split(">")[0].strip('"')
-            print(items[1].split('=')[1].split(">")[0].strip('"'))
+            #print(items[1].split('=')[1].split(">")[0].strip('"'))
 
     data['input'] = 'distort'
     data['origintype'] = 'method4'
@@ -209,18 +211,24 @@ def _postDistort(data, isoformat, output_dict = {}, generate_zipped_files=False)
             val = items[3].split('=', 1)[1].strip('>"')
             data[name] = val
 
-        if b'input type="text"' in line:
-            items = line.decode('utf-8').split(' ', 5)
-            name = [s for s in items if 'name=' in s][0].split('=')[1].strip('"')
 
-            val = [s for s in items if 'value=' in s][0].split('=')[1].strip('"')
+        if b'input type="text"' in line:
+            # There is now a prepended space on the start of +ve numbers that broke the old extraction method
+            items = line.decode('utf-8')
+            name_re = re.compile("name=\"([a-z0-9]*)\"", flags=re.I)
+            val_re = re.compile("value=\"([a-z0-9+-E ]*)\"", flags=re.I)
+
+            name = name_re.search(items).group(1)
+            val = val_re.search(items).group(1)
             data[name] = val
 
         if b'RADIO' in line and b'CHECKED' in line:
-            items = line.decode('utf-8').split(' ', 3)
-            name = items[2].split('"')[1]
-
-            val = items[3].split('"')[1]
+            items = line.decode('utf-8')
+            name_re = re.compile("name=\"([a-zA-Z0-9]*)\"", flags=re.I)
+            val_re = re.compile("value=\"([a-z0-9+-E ]*)\"", flags=re.I)
+            
+            name = name_re.search(items).group(1)
+            val = val_re.search(items).group(1)
             data[name] = val
 
         if b'</FORM>' in line:
@@ -376,7 +384,7 @@ def get(cifname, outfname, method=3, var_dict={}, isoformat='topas',
                     out4 = []
 
         if method == 4:
-            out2, data2 = _setDatam4(data, subcif, specify = specify, basis = basis, var_dict = var_dict)
+            out2, data2 = _setDatam4(data1, subcif, specify = specify, basis = basis, var_dict = var_dict)
             out3, data3 = _postDistort(data2, isoformat)
             out4 = _postDisplayDistort(data3, outfname)
         return [out1, data1, out2, data2, out3, data3, out4]
