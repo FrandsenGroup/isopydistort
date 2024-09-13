@@ -404,7 +404,7 @@ def get(cifname, outfname, method=3, var_dict={}, isoformat='topas',
                     out4 = []
 
         if method == 4:
-            out2, data2 = _setDatam4(data, subcif, specify = specify, basis = basis, var_dict = var_dict)
+            out2, data2 = _setDatam4(data1, subcif, specify = specify, basis = basis, var_dict = var_dict)
             out3, data3 = _postDistort(data2, isoformat)
             out4 = _postDisplayDistort(data3, outfname)
         return [out1, data1, out2, data2, out3, data3, out4]
