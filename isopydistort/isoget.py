@@ -245,21 +245,49 @@ def _postDisplayDistort(data, fname, zipped=False):
     f.close()
     return out
 
+
+
 def _find_zip_file_name(output):
-    """Parse http output to get file names of zipped topas and cif files
-    """
+    """Parse http output from ISODISTORT to get file names of zipped topas and cif files"""
+    
+    # Helper lambda to extract zip filename
+    extract_zip_name = lambda line: re.findall(r'[a-zA-Z]+[0-9]+', line.strip().split('VALUE=')[-1].strip())[0]
+
     returndict = {}
-    lines = list(output.iter_lines())
-    while len(returndict) < 2:
-        for line in lines[::-1]:
+    lines = list(output.iter_lines())[::-1]  # Reverse lines
+    
+    try:
+        for line in lines:
             line = str(line)
-            if ('zipfilename' in line) and ('cif' in line):
-                string = line.strip().split('VALUE=')[-1].strip()
-                returndict['cifzipname'] = re.findall(r'[a-zA-Z]+[0-9]+', string)[0]
-            if ('zipfilename' in line) and ('topas' in line):
-                string = line.strip().split('VALUE=')[-1].strip()
-                returndict['topaszipname'] = re.findall(r'[a-zA-Z]+[0-9]+', string)[0]
-    return returndict 
+            
+            if 'zipfilename' in line and 'cif' in line and 'cifzipname' not in returndict:
+                returndict['cifzipname'] = extract_zip_name(line)
+            
+            if 'zipfilename' in line and 'topas' in line and 'topaszipname' not in returndict:
+                returndict['topaszipname'] = extract_zip_name(line)
+
+            # check for ISODISTORT server error with keyword 'bombed' that occcurs in ISODISTORT's error message
+            if 'bombed' in line:
+                raise RuntimeError(f'''\nRUNTIME ERROR MESSAGE FROM ISODISTORT SERVER: \n{line}\n
+Double Check your input, and if there is no user error, email Branton Campbell at BYU with a detailed log of your error. 
+Things to include in your error report:
+1. Parent CIF 
+2. Detailed steps to reproduce your error. 
+Email: branton_campbell@byu.edu \n''')
+            
+            # If both files are found, exit the loop early
+            if len(returndict) == 2:
+                break
+        
+        if len(returndict) < 2:
+            raise ValueError("Both 'cif' and 'topas' zip filenames could not be found.")
+
+    except (IndexError, KeyError, ValueError, RuntimeError) as e:
+        raise RuntimeError(f"Error parsing output: {e}")
+
+    return returndict
+
+
 
 def get(cifname, outfname, method=3, var_dict={}, isoformat='topas',
         selection=1, subcif = "", specify = False, basis = [],
@@ -376,7 +404,7 @@ def get(cifname, outfname, method=3, var_dict={}, isoformat='topas',
                     out4 = []
 
         if method == 4:
-            out2, data2 = _setDatam4(data, subcif, specify = specify, basis = basis, var_dict = var_dict)
+            out2, data2 = _setDatam4(data1, subcif, specify = specify, basis = basis, var_dict = var_dict)
             out3, data3 = _postDistort(data2, isoformat)
             out4 = _postDisplayDistort(data3, outfname)
         return [out1, data1, out2, data2, out3, data3, out4]
