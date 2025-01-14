@@ -201,6 +201,9 @@ def _postDistort(data, isoformat, output_dict = {}, generate_zipped_files=False)
         if b"<FORM ACTION" in line:
             break
 
+    # Regex expression for value=" X", X: decimal value
+    pattern = re.compile(r'(value=")\s+(\d+(\.\d+)?)"')    
+
     for line in line_iter:
         if b'INPUT TYPE="hidden"' in line:
             items = line.decode('utf-8').split(' ', 3)
@@ -210,7 +213,9 @@ def _postDistort(data, isoformat, output_dict = {}, generate_zipped_files=False)
             data[name] = val
 
         if b'input type="text"' in line:
-            items = line.decode('utf-8').split(' ', 5)
+            raw_items = line.decode('utf-8')
+            corrected_items = pattern.sub(r'\1\2"', raw_items)
+            items = corrected_items.split(' ',5)
             name = [s for s in items if 'name=' in s][0].split('=')[1].strip('"')
 
             val = [s for s in items if 'value=' in s][0].split('=')[1].strip('"')
